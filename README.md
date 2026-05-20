@@ -1,96 +1,92 @@
-## SWE-PolyBench: A multi-language benchmark for repository level evaluation of coding agents
+# PolyBench – Internal Multi‑Language Benchmark Reference
 
-<div align="center">
-  
-[![Website](https://img.shields.io/badge/Website-Visit-blue?style=for-the-badge)](https://amazon-science.github.io/SWE-PolyBench/)
-[![Paper](https://img.shields.io/badge/Paper-arXiv-red?style=for-the-badge)](https://arxiv.org/abs/2504.08703)
-[![Dataset](https://img.shields.io/badge/Dataset-HuggingFace-yellow?style=for-the-badge)](https://huggingface.co/datasets/AmazonScience/SWE-PolyBench)
+Personal reference for a multi‑language repository‑level software engineering benchmark.  
+Contains 2,110 curated issues across **Java, JavaScript, TypeScript, and Python**.  
+Includes stratified subsets (500 and 382 issues) for rapid experimentation.
 
-</div>
+> *Cloned from a public source and adapted for personal evaluation workflows.*
 
-Hello! We are delighted to announce SWE-PolyBench! A multi language repo level software engineering benchmark. It contains 2110 curated issues in four languages (Java, JavaScript, TypeScript, and Python). In addition, it contains a stratified subset of 500 issues (SWE-PolyBench500) and a Verified subset of 382 issues (SWE-PolyBench_Verified) for the purpose of rapid experimentation. Please find more details below.
+---
 
-## 🚀 Updates 🚀
-* **09/18/2025**
-  - After receiving valuable feedback about our verified split, we updated the `Dockerfile` column for some instances and ensured that the pre-built images result in a 100% pass rate on the gold patch. 
-  - We removed two duplicate-like entries from the Java split of SWE-PolyBench_Verified
-* **08/27/2025**
-  - **SWE-PolyBench Verified Split Released** - We have released the SWE-PolyBench Verified split with curated annotations containing 382 samples (72 Java, 100 JavaScript, 113 Python, and 100 TypeScript instances). The annotations are available in `data/annotations.jsonl` for enhanced evaluation and analysis. Check out the updated [leaderboard](https://amazon-science.github.io/SWE-PolyBench/).
+## Datasets (Local Reference)
 
-  - **Pre-built Docker Images Support** - We merged [PR #8](https://github.com/amazon-science/SWE-PolyBench/pull/8) which enables instant use of pre-built Docker images, significantly reducing setup time and improving the evaluation experience.
+- Full dataset: 2,110 instances  
+- Sampled dataset (PB500): 500 instances (125 per language, 40‑40‑20 split across Bug Fix / Feature / Refactoring)  
+- Verified dataset (PBv): 382 instances with curated annotations
 
-## Datasets
-The datasets are available on Huggingface. We have the full dataset (PB) (`AmazonScience/SWE-PolyBench`) with 2110 instances, a sampled dataset (total 500 instances) called `PB500` (`AmazonScience/SWE-PolyBench_500`) where we have 125 instances from each language and a good distribution of task categories, i.e. Bug Fix, Feature, and Refactoring (40-40-20 split), and a verified dataset (total 382 instances) called `PBv` (`AmazonScience/SWE-PolyBench_Verified`).
+All dataset references are stored locally – not published.
 
-## Evaluation
-The main file to run is `src/poly_bench_evaluation/run_evaluation.py`. These are the following parameters it takes:
-- `--dataset-path` (required): The path to the datasets.
-- `--predictions-path`: The model generated `.jsonl` predictions file. The file at the minimum needs to have `instance_id` and `model_patch` keys. The `model_patch` key should ONLY be a string (str).
-- `--result-path` (required): This is the directory path to output the instance level results.
-- `--num-threads`: Default is 1. For a machine with 16 cores CPU and 64GB Ram, 10-12 threads are recommended.
-- `--evaluate-gold`: Whether to run the gold code patch evaluator. If this flag is used, the `predictions-path` parameter is not required and will be overwritten even if provided. To evaluate a model generated patch, please do not use the `evaluate-gold` flag.
-- `--repo-path`: The directory to store base repos.
-- `--delete-image`: Whether to delete the instance level image. Please note that, deleting the image is recommended if you do not have storage. Please use the `delete-image` flag to set it to True.
-- `--skip-existing`: Whether to skip existing evaluations in `result-path`. If set to true, the instances that are available in result-path already will be skipped.
-- `--metrics-only` : This flag, when set will only compute the file retrieval metrics and the pass rate will not be computed. Typically this flag may be used after the pass rates are computed.
-- `--node-metrics`: If you also want to compute node retrieval metrics (this will increase time of running evaluation)
+---
 
-## Docker images
-We have frozen the instance level docker images and uploaded them to GHCR. Please only use the GHCR docker images (instance level). They are public and can be easily pulled separately. If you run the code as is, it will automatically pull from GHCR so you do not need to do anything else. If you need specific docker images for research purpose, they can be pulled like this:
+## Evaluation Harness (Internal Use)
+
+Main script: `src/poly_bench_evaluation/run_evaluation.py`
+
+### Key parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `--dataset-path` | Path to local dataset |
+| `--predictions-path` | Model‑generated `.jsonl` predictions (must have `instance_id` and `model_patch`) |
+| `--result-path` | Output directory for instance‑level results |
+| `--num-threads` | Default 1. For 16‑core CPU / 64GB RAM, use 10‑12 |
+| `--evaluate-gold` | Evaluates gold patches (ignores `predictions-path`) |
+| `--repo-path` | Directory to store base repositories |
+| `--delete-image` | Delete instance‑level Docker images after run (saves space) |
+| `--skip-existing` | Skip already‑evaluated instances |
+| `--metrics-only` | Compute only file retrieval metrics (no pass rate) |
+| `--node-metrics` | Include node retrieval metrics (slower) |
+
+---
+
+## Docker Images
+
+Pre‑built instance‑level Docker images are pulled from a public registry automatically.  
+If needed manually:
+
 ```sh
 docker pull ghcr.io/timesler/swe-polybench.eval.x86_64.<instance_id>:v1.1
-```
 Example:
-```sh
+
+sh
 docker pull ghcr.io/timesler/swe-polybench.eval.x86_64.google__gson-2337:v1.1
-```
+Setup & Run (Local)
+Python 3.11+ recommended (conda environment optional)
 
-## Steps to run
-Using a conda environment with python=3.11 is recommended.
+bash
+git clone <local-reference>
+cd PolyBench
+pip install -r requirements.txt
+pip install -e .
+Evaluate gold patches
+bash
+python3 src/poly_bench_evaluation/run_evaluation.py \
+  --dataset-path <local_path_or_HF_ref> \
+  --result-path ./eval_logs \
+  --num-threads 9 \
+  --repo-path ~/repos \
+  --delete-image \
+  --evaluate-gold
+Evaluate model‑generated patches
+bash
+python3 src/poly_bench_evaluation/run_evaluation.py \
+  --dataset-path <local_path_or_HF_ref> \
+  --result-path ./eval_logs \
+  --num-threads 9 \
+  --repo-path ~/repos \
+  --delete-image \
+  --predictions-path ./model_generated_predictions.jsonl \
+  --skip-existing
+Outputs
+Instance‑level results (passing/failing tests) saved in --result-path
 
-1. Git clone this repo.
-2. Cd into the cloned directory and from root folder install the requirements in a conda environment with python>3.10 with `pip install -r requirements.txt`
-3. Run `pip install -e .` from root folder.
-4. Run the evaluation using:
-```sh
-python3 src/poly_bench_evaluation/run_evaluation.py --dataset-path <dataset_path_or_hf_path> --result-path ./eval_logs
-```
+Combined summary written to ./result.json
 
-A sample run command to evaluate gold code patches (from root directory of package):
-```sh
-python3 src/poly_bench_evaluation/run_evaluation.py --dataset-path AmazonScience/SWE-PolyBench --result-path ./eval_logs/ --num-threads 9 --repo-path ~/repos --delete-image --evaluate-gold
-```
+Test run logs stored in ./run_logs_{language}
 
-A sample run command to evaluate model generated patches (from root directory of package):
-```sh
-python3 src/poly_bench_evaluation/run_evaluation.py --dataset-path AmazonScience/SWE-PolyBench --result-path ./eval_logs/ --num-threads 9 --repo-path ~/repos --delete-image --predictions-path ./model_generated_predictions.jsonl --skip-existing
-```
-## Results
+Troubleshooting (Container conflicts)
+If you see container conflicts after interrupting a run:
 
-The instance level results of each instance will be stored in `--result-path`. Instance level results include the list of passing tests and failing tests. The combined result will be outputted in the root directory `./result.json` file. In the terminal, the pass rate alongside the total number of "resolved" instances will also be printed.
-
-The test run logs of each instance will also be stored in `./run_logs_{language}` directory. The raw output from the test run can be found here.
-
-## Submission
-To make a submission to SWE-PolyBench leaderboard, please follow this [README](https://github.com/amazon-science/SWE-PolyBench/blob/submission/README.md).
-
-## ✍️ Citation
-If you find our work helpful, please use the following citation.
-```
-@misc{rashid2025swepolybenchmultilanguagebenchmarkrepository,
-      title={SWE-PolyBench: A multi-language benchmark for repository level evaluation of coding agents}, 
-      author={Muhammad Shihab Rashid and Christian Bock and Yuan Zhuang and Alexander Buchholz and Tim Esler and Simon Valentin and Luca Franceschi and Martin Wistuba and Prabhu Teja Sivaprasad and Woo Jung Kim and Anoop Deoras and Giovanni Zappella and Laurent Callot},
-      year={2025},
-      eprint={2504.08703},
-      archivePrefix={arXiv},
-      primaryClass={cs.SE},
-      url={https://arxiv.org/abs/2504.08703}, 
-}
-```
-
-## Troubleshooting
-If you get container conflict error (which may happen if you terminate your running code and run again), then please execute this command in terminal:
-```sh
+bash
 docker rm -f $(docker ps -a -q)
-```
-Caution: This will remove ALL running containers, so please proceed with caution.
+⚠️ This removes all running containers – use with care.
