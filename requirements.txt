@@ -1,11 +1,13 @@
-pandas
-docker
-loguru
-pydantic
-GitPython
-tree-sitter-languages==1.10.2
-scikit-learn==1.3.2
-unidiff==0.7.5
-whatthepatch==1.0.4
-tree-sitter==0.21.3
-datasets
+# PolyBench - Evaluation harness dependencies
+
+pandas                           # Data manipulation and analysis for benchmark results
+docker                           # Docker SDK for managing containers (running evaluation environments)
+loguru                           # Logging library for structured and colorful log output
+pydantic                         # Data validation and settings management using Python type hints
+GitPython                        # Git repository interaction (cloning, checking out commits)
+tree-sitter-languages==1.10.2    # Pre-built language parsers for tree-sitter (syntax analysis)
+scikit-learn==1.3.2              # Machine learning utilities (for metrics computation)
+unidiff==0.7.5                   # Unified diff parsing (handling patch formats)
+whatthepatch==1.0.4              # Alternative patch parsing library (supports different diff formats)
+tree-sitter==0.21.3              # Parser generator tool for building syntax trees (core library)
+datasets                         # Hugging Face datasets library (loading benchmark datasets)
